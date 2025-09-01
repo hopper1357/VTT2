@@ -75,6 +75,18 @@ class GameState:
     """Manages the overall state of the game session."""
     def __init__(self):
         self.players: Dict[str, Dict] = {}
+        self.characters: Dict[str, Dict] = {}
+        self.map_state: Dict = {
+            "tokens": {}
+        }
+
+    def to_dict(self):
+        """Returns a dictionary representation of the game state."""
+        return {
+            "players": self.players,
+            "characters": self.characters,
+            "map_state": self.map_state
+        }
 
     def add_player(self, client_id: str):
         if client_id not in self.players:
@@ -85,6 +97,19 @@ class GameState:
         if client_id in self.players:
             del self.players[client_id]
             print(f"Player {client_id} removed from game state.")
+
+    def update_character(self, character_id: str, character_data: Dict):
+        """Adds or updates a character in the game state."""
+        self.characters[character_id] = character_data
+        print(f"Character {character_id} updated.")
+
+    def move_token(self, token_id: str, x: int, y: int):
+        """Moves a token to a new position on the map."""
+        if token_id not in self.map_state["tokens"]:
+            self.map_state["tokens"][token_id] = {}
+        self.map_state["tokens"][token_id]["x"] = x
+        self.map_state["tokens"][token_id]["y"] = y
+        print(f"Token {token_id} moved to ({x}, {y}).")
 
 class ConnectionManager:
     """Manages active WebSocket connections."""
@@ -142,7 +167,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
     # Send the new client their ID and the current game state
     await manager.send_personal_message(
-        {"type": "connection_ready", "payload": {"client_id": client_id, "game_state": game_state.players}},
+        {"type": "connection_ready", "payload": {"client_id": client_id, "game_state": game_state.to_dict()}},
         client_id
     )
 
