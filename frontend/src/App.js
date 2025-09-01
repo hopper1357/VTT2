@@ -8,11 +8,14 @@ import BottomBar from './components/BottomBar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { GameStateProvider, GameStateContext } from './context/GameStateContext';
+import { ModuleProvider, ModuleContext } from './context/ModuleContext';
 import websocketService from './services/websocket';
 
 const AppContent = () => {
   const { handleServerEvent } = useContext(GameStateContext);
+  const { fetchModules } = useContext(ModuleContext);
 
+  // Effect for WebSocket connection
   useEffect(() => {
     // Define event handlers
     const onConnectionReady = (payload) => handleServerEvent('connection_ready', payload);
@@ -37,6 +40,11 @@ const AppContent = () => {
     };
   }, [handleServerEvent]);
 
+  // Effect for fetching modules
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
+
   return (
     <div className="vtt-container">
       <TopBar />
@@ -50,11 +58,13 @@ const AppContent = () => {
 
 function App() {
   return (
-    <GameStateProvider>
-      <DndProvider backend={HTML5Backend}>
-        <AppContent />
-      </DndProvider>
-    </GameStateProvider>
+    <ModuleProvider>
+      <GameStateProvider>
+        <DndProvider backend={HTML5Backend}>
+          <AppContent />
+        </DndProvider>
+      </GameStateProvider>
+    </ModuleProvider>
   );
 }
 
