@@ -2,11 +2,7 @@ import React, { useContext } from 'react';
 import { ModuleContext } from '../context/ModuleContext';
 
 const MapArea = () => {
-  const { selectedModule, loadedComponents } = useContext(ModuleContext);
-
-  const CharacterSheet = selectedModule
-    ? loadedComponents[selectedModule.id]?.CharacterSheet
-    : null;
+  const { selectedModule, openCharacterSheet } = useContext(ModuleContext);
 
   return (
     <div className="map-area" style={{
@@ -15,8 +11,8 @@ const MapArea = () => {
       border: '1px solid #ccc',
       padding: '10px'
     }}>
-      {CharacterSheet ? (
-        <CharacterSheet />
+      {selectedModule ? (
+        <button onClick={openCharacterSheet}>Show Character Sheet</button>
       ) : (
         <p>Select a module to see its character sheet.</p>
       )}

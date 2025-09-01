@@ -7,6 +7,10 @@ export const ModuleProvider = ({ children }) => {
     const [modules, setModules] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
     const [loadedComponents, setLoadedComponents] = useState({});
+    const [isCharacterSheetVisible, setCharacterSheetVisible] = useState(false);
+
+    const openCharacterSheet = () => setCharacterSheetVisible(true);
+    const closeCharacterSheet = () => setCharacterSheetVisible(false);
 
     const registerComponents = useCallback((moduleId, components) => {
         setLoadedComponents(prev => ({ ...prev, [moduleId]: components }));
@@ -54,7 +58,10 @@ export const ModuleProvider = ({ children }) => {
         loadedComponents,
         fetchModules,
         selectModule,
-        registerComponents
+        registerComponents,
+        isCharacterSheetVisible,
+        openCharacterSheet,
+        closeCharacterSheet
     };
 
     return (

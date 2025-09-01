@@ -5,6 +5,7 @@ import LeftPanel from './components/LeftPanel';
 import MapArea from './components/MapArea';
 import RightPanel from './components/RightPanel';
 import BottomBar from './components/BottomBar';
+import CharacterSheetModal from './components/CharacterSheetModal';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { GameStateProvider, GameStateContext } from './context/GameStateContext';
@@ -68,6 +69,7 @@ const AppContent = () => {
       <MapArea />
       <RightPanel />
       <BottomBar />
+      <CharacterSheetModal />
     </div>
   );
 };
