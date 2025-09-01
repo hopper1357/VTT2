@@ -34,25 +34,22 @@ The core technologies are:
 
 ## ✅ Completed Tasks
 
-The following foundational features for the backend have been implemented:
+### Backend
+- **Core Engine:** Initialized a FastAPI application to serve as the core engine.
+- **Stateful Multiplayer Sync:** Implemented a WebSocket endpoint (`/ws`) that manages player state (join/leave events) and broadcasts structured JSON messages.
+- **Dice Rolling:** Created an HTTP endpoint (`/roll/{dice_string}`) to handle simple dice notation (e.g., `2d6`, `1d20`).
+- **Verification:** Added a `test_client.py` script to verify backend functionality.
 
-- **Core Backend Engine:**
-  - Initialized a FastAPI application to serve as the core engine.
-  - Set up the project structure with a `backend` directory.
-  - Created a `.gitignore` file for a standard Python project.
-- **Multiplayer Communication (Proof of Concept):**
-  - Implemented a WebSocket endpoint (`/ws`) that broadcasts messages to all connected clients.
-- **Dice Rolling:**
-  - Created an HTTP endpoint (`/roll/{dice_string}`) to handle simple dice notation (e.g., `2d6`, `1d20`).
-- **Verification:**
-  - Added a `test_client.py` script to verify the backend functionality.
+### Frontend
+- **Application Scaffolding:** Set up a React application in the `frontend` directory using Create React App.
+- **Core UI Layout:** Implemented the main UI structure with CSS Grid and placeholder components as defined in the design document.
+- **State Management:** Created a global state provider using React Context to manage shared application state.
+- **Backend Integration:** Established a WebSocket connection from the frontend to the backend to receive and display real-time game state (e.g., the list of online players).
 
 ## 📝 To-Do List (Project Roadmap)
 
 This project will be developed in phases, as outlined in the design document. The next major steps are:
 
-- **Phase 2: React UI with CSS Grid + Drag/Drop:** Develop the main frontend interface for the map, tokens, and UI panels.
-- **Phase 3: Advanced Multiplayer Sync:** Implement more robust game state synchronization beyond simple message broadcasting.
 - **Phase 4: Module Runtime Loader:** Build the system for dynamically loading game-specific modules (character sheets, rules, etc.).
 - **Phase 5: GUI Module Creator (MVP):** Create a basic tool to assist users in building their own modules.
 - **Phase 6: UI Enhancements:** Add portals, modals, and pop-out windows for character sheets and other UI elements.

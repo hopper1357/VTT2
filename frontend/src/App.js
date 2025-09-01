@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 import './App.css';
 import TopBar from './components/TopBar';
 import LeftPanel from './components/LeftPanel';
@@ -7,18 +7,53 @@ import RightPanel from './components/RightPanel';
 import BottomBar from './components/BottomBar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { GameStateProvider, GameStateContext } from './context/GameStateContext';
+import websocketService from './services/websocket';
+
+const AppContent = () => {
+  const { handleServerEvent } = useContext(GameStateContext);
+
+  useEffect(() => {
+    // Define event handlers
+    const onConnectionReady = (payload) => handleServerEvent('connection_ready', payload);
+    const onPlayerJoin = (payload) => handleServerEvent('player_join', payload);
+    const onPlayerLeave = (payload) => handleServerEvent('player_leave', payload);
+
+    // Register event listeners
+    websocketService.on('connection_ready', onConnectionReady);
+    websocketService.on('player_join', onPlayerJoin);
+    websocketService.on('player_leave', onPlayerLeave);
+
+    // Connect to the server
+    websocketService.connect();
+
+    // In a real app, you'd implement a cleanup function to remove listeners
+    // when the component unmounts, but for this singleton service, we'll omit it.
+    // return () => {
+    //   websocketService.off('connection_ready', onConnectionReady);
+    //   websocketService.off('player_join', onPlayerJoin);
+    //   websocketService.off('player_leave', onPlayerLeave);
+    // };
+  }, [handleServerEvent]);
+
+  return (
+    <div className="vtt-container">
+      <TopBar />
+      <LeftPanel />
+      <MapArea />
+      <RightPanel />
+      <BottomBar />
+    </div>
+  );
+};
 
 function App() {
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="vtt-container">
-        <TopBar />
-        <LeftPanel />
-        <MapArea />
-        <RightPanel />
-        <BottomBar />
-      </div>
-    </DndProvider>
+    <GameStateProvider>
+      <DndProvider backend={HTML5Backend}>
+        <AppContent />
+      </DndProvider>
+    </GameStateProvider>
   );
 }
 
