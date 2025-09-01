@@ -6,6 +6,12 @@ export const ModuleContext = createContext();
 export const ModuleProvider = ({ children }) => {
     const [modules, setModules] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
+    const [loadedComponents, setLoadedComponents] = useState({});
+
+    const registerComponents = useCallback((moduleId, components) => {
+        setLoadedComponents(prev => ({ ...prev, [moduleId]: components }));
+        console.log(`Components for module ${moduleId} have been registered.`);
+    }, []);
 
     const fetchModules = useCallback(async () => {
         try {
@@ -45,8 +51,10 @@ export const ModuleProvider = ({ children }) => {
     const value = {
         modules,
         selectedModule,
+        loadedComponents,
         fetchModules,
-        selectModule
+        selectModule,
+        registerComponents
     };
 
     return (

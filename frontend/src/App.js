@@ -13,7 +13,23 @@ import websocketService from './services/websocket';
 
 const AppContent = () => {
   const { handleServerEvent } = useContext(GameStateContext);
-  const { fetchModules } = useContext(ModuleContext);
+  const { fetchModules, registerComponents } = useContext(ModuleContext);
+
+  // Effect to handle module component registration
+  useEffect(() => {
+    const handleModuleLoaded = (event) => {
+      const { moduleId } = event.detail;
+      const components = window[`${moduleId}_components`];
+      if (components) {
+        registerComponents(moduleId, components);
+      }
+    };
+
+    window.addEventListener('module-loaded', handleModuleLoaded);
+    return () => {
+      window.removeEventListener('module-loaded', handleModuleLoaded);
+    };
+  }, [registerComponents]);
 
   // Effect for WebSocket connection
   useEffect(() => {
