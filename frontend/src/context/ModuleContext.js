@@ -7,6 +7,11 @@ export const ModuleProvider = ({ children }) => {
     const [modules, setModules] = useState([]);
     const [selectedModule, setSelectedModule] = useState(null);
     const [loadedComponents, setLoadedComponents] = useState({});
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    const toggleSheet = useCallback((isOpen) => {
+        setIsSheetOpen(isOpen);
+    }, []);
 
     const registerComponents = useCallback((moduleId, components) => {
         setLoadedComponents(prev => ({ ...prev, [moduleId]: components }));
@@ -34,6 +39,7 @@ export const ModuleProvider = ({ children }) => {
         if (module) {
             setSelectedModule(module);
             console.log("Selected module:", module);
+            toggleSheet(true); // Open the sheet on selection
 
             const scriptUrl = `http://localhost:8000/modules/${module.id}/${module.entry_point}`;
             try {
@@ -42,19 +48,22 @@ export const ModuleProvider = ({ children }) => {
                 console.error(`Error loading module script for ${module.id}:`, error);
                 // Optionally, deselect the module or show an error state
                 setSelectedModule(null);
+                toggleSheet(false);
             }
         } else {
             console.error(`Module with id ${moduleId} not found.`);
         }
-    }, [modules]); // Re-create if modules list changes
+    }, [modules, toggleSheet]); // Re-create if modules list changes
 
     const value = {
         modules,
         selectedModule,
         loadedComponents,
+        isSheetOpen,
         fetchModules,
         selectModule,
-        registerComponents
+        registerComponents,
+        toggleSheet
     };
 
     return (
