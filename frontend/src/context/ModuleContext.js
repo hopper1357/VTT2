@@ -1,4 +1,5 @@
 import React, { createContext, useState, useCallback } from 'react';
+import { loadScript } from '../services/dynamicScriptLoader';
 
 export const ModuleContext = createContext();
 
@@ -22,11 +23,20 @@ export const ModuleProvider = ({ children }) => {
         }
     }, []); // Empty dependency array means this is created once
 
-    const selectModule = useCallback((moduleId) => {
+    const selectModule = useCallback(async (moduleId) => {
         const module = modules.find(m => m.id === moduleId);
         if (module) {
             setSelectedModule(module);
             console.log("Selected module:", module);
+
+            const scriptUrl = `http://localhost:8000/modules/${module.id}/${module.entry_point}`;
+            try {
+                await loadScript(scriptUrl);
+            } catch (error) {
+                console.error(`Error loading module script for ${module.id}:`, error);
+                // Optionally, deselect the module or show an error state
+                setSelectedModule(null);
+            }
         } else {
             console.error(`Module with id ${moduleId} not found.`);
         }
