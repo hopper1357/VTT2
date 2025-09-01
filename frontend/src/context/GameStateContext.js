@@ -5,6 +5,7 @@ export const GameStateContext = createContext();
 export const GameStateProvider = ({ children }) => {
     const [clientId, setClientId] = useState(null);
     const [players, setPlayers] = useState({});
+    const [eventLog, setEventLog] = useState([]);
 
     // useCallback ensures this function reference is stable
     const handleServerEvent = useCallback((type, payload) => {
@@ -29,6 +30,9 @@ export const GameStateProvider = ({ children }) => {
                     return newPlayers;
                 });
                 break;
+            case 'ACTION_RESULT':
+                setEventLog(prevLog => [...prevLog, payload.result_text]);
+                break;
             default:
                 // Do nothing for unhandled event types
                 break;
@@ -38,6 +42,7 @@ export const GameStateProvider = ({ children }) => {
     const value = {
         clientId,
         players,
+        eventLog,
         handleServerEvent
     };
 

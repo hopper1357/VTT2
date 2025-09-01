@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { ModuleContext } from '../context/ModuleContext';
 import Modal from './Modal';
+import websocketService from '../services/websocket';
 
 const MapArea = () => {
   const { selectedModule, loadedComponents, isSheetOpen, toggleSheet } = useContext(ModuleContext);
@@ -23,7 +24,7 @@ const MapArea = () => {
 
       <Modal isOpen={isSheetOpen} onClose={() => toggleSheet(false)}>
         {CharacterSheet ? (
-          <CharacterSheet />
+          <CharacterSheet sendAction={websocketService.send.bind(websocketService)} />
         ) : (
           <p>Loading character sheet...</p>
         )}

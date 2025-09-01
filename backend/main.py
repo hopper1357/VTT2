@@ -155,12 +155,21 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             message = json.loads(data)
-            # For now, we only handle chat messages
+            # Route incoming messages based on their type
             if message.get("type") == "chat_message":
                 await manager.broadcast({
                     "type": "chat_message",
                     "payload": {"from": client_id, "text": message["payload"]["text"]}
                 })
+            elif message.get("type") == "PERFORM_ACTION":
+                action = message.get("payload", {})
+                if action.get("action_id") == "roll_strength_check":
+                    roll = random.randint(1, 20)
+                    result_text = f"Player {client_id[:8]}... rolled a {roll} on a Strength Check."
+                    await manager.broadcast({
+                        "type": "ACTION_RESULT",
+                        "payload": { "result_text": result_text }
+                    })
 
     except WebSocketDisconnect:
         manager.disconnect(client_id)

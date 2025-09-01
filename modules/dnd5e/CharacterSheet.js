@@ -14,14 +14,28 @@
   const e = React.createElement;
 
   // Define the CharacterSheet component using React.createElement
-  const CharacterSheet = () => {
+  const CharacterSheet = ({ sendAction }) => {
+    const handleRollClick = () => {
+      if (sendAction) {
+        console.log("Sending PERFORM_ACTION: roll_strength_check");
+        sendAction("PERFORM_ACTION", { action_id: "roll_strength_check" });
+      } else {
+        console.error("sendAction prop not provided to CharacterSheet component.");
+      }
+    };
+
     return e(
       'div',
       { style: { padding: '20px', border: '1px solid blue', backgroundColor: 'white' } },
       e('h2', null, 'D&D 5e Character Sheet'),
       e('p', null, 'This is a dynamically loaded character sheet component.'),
       e('p', null, 'Name: John Doe'),
-      e('p', null, 'Class: Fighter')
+      e('p', null, 'Class: Fighter'),
+      e(
+        'button',
+        { onClick: handleRollClick, style: { marginTop: '10px' } },
+        'Roll Strength Check'
+      )
     );
   };
 

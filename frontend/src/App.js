@@ -37,11 +37,13 @@ const AppContent = () => {
     const onConnectionReady = (payload) => handleServerEvent('connection_ready', payload);
     const onPlayerJoin = (payload) => handleServerEvent('player_join', payload);
     const onPlayerLeave = (payload) => handleServerEvent('player_leave', payload);
+    const onActionResult = (payload) => handleServerEvent('ACTION_RESULT', payload);
 
     // Register event listeners
     websocketService.on('connection_ready', onConnectionReady);
     websocketService.on('player_join', onPlayerJoin);
     websocketService.on('player_leave', onPlayerLeave);
+    websocketService.on('ACTION_RESULT', onActionResult);
 
     // Connect to the server
     websocketService.connect();
@@ -52,6 +54,7 @@ const AppContent = () => {
       websocketService.off('connection_ready', onConnectionReady);
       websocketService.off('player_join', onPlayerJoin);
       websocketService.off('player_leave', onPlayerLeave);
+      websocketService.off('ACTION_RESULT', onActionResult);
       websocketService.disconnect();
     };
   }, [handleServerEvent]);
