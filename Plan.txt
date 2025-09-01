@@ -1,0 +1,173 @@
+Universal Virtual Tabletop (UVTT) — Design Document
+📌 Overview
+
+Project Goal:
+Create a cross-platform, multiplayer-capable Universal Virtual Tabletop (UVTT) with a Python backend engine and JavaScript-based modules. The UI will be developed using React with CSS Grid layout, portals, and drag-and-drop features. Modules will define game-specific logic and UI, and a GUI-based module creation tool will simplify building them.
+
+1. 🧱 High-Level Architecture
+
+
+| Layer       | Tech Stack                    | Responsibilities                            |
+| ----------- | ----------------------------- | ------------------------------------------- |
+| Core Engine | Python (FastAPI + WebSockets) | Game logic, multiplayer sync, API interface |
+| Frontend UI | React + CSS Grid + Portals    | UI layout, map display, module interface    |
+| Modules     | JavaScript (ES6 Modules)      | Game-specific logic (DnD, Shadowrun, etc.)  |
+| GUI Tooling | Electron + React or Web-based | GUI to assist in module development         |
+
+2. ⚙️ Python Core Engine
+2.1 Responsibilities
+
+Game state management
+
+Player and session coordination
+
+Game system abstraction via plugin/module loading
+
+Multiplayer communication (WebSocket)
+
+Dice parsing and resolution
+
+Validation and rule enforcement
+
+2.2 Multiplayer (Early Priority)
+
+WebSocket server using FastAPI + WebSockets
+
+Session management: create/join/leave
+
+Broadcast system for real-time updates (chat, token moves, etc.)
+
+3. 🧩 Module System (JavaScript)
+3.1 Module Manifest
+{
+  "name": "Dungeons & Dragons 5E",
+  "version": "1.0.0",
+  "entry_point": "main.js",
+  "character_sheet": "CharacterSheet.jsx",
+  "rules": "rules.js",
+  "assets": ["spells.json", "icons/"]
+}
+
+3.2 Module Capabilities
+
+Custom character sheets (React components)
+
+Game rule logic (JS functions)
+
+Event hooks (combat, initiative, abilities)
+
+Resource packs (e.g., images, audio)
+
+3.3 Module Runtime
+
+Modules interface with the Python core via a secure WebSocket-based RPC system, and React dynamically imports module UI components using React.lazy.
+
+4. 🖼️ UI & Layout (React + CSS Grid + Portals)
+4.1 Layout Goals
+
+Modular and resizable panels
+
+Flexible enough to support different game UIs
+
+Uses CSS Grid for overall structure
+
+Popouts and modals via React Portals
+
+Drag-and-drop support for tokens, items, handouts
+
+4.2 Layout Structure
+.vtt-container (Grid)
+├── TopBar         [grid-area: header]
+├── LeftPanel      [grid-area: sidebar-left]
+├── MapArea        [grid-area: main]
+├── RightPanel     [grid-area: sidebar-right]
+├── BottomBar      [grid-area: footer]
+
+.vtt-container {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar-left main sidebar-right"
+    "footer footer footer";
+  grid-template-columns: 250px 1fr 300px;
+  grid-template-rows: 48px 1fr 48px;
+  height: 100vh;
+}
+
+advanced ui features
+| Feature              | Tech Used                             | Description                                           |
+| -------------------- | ------------------------------------- | ----------------------------------------------------- |
+| **CSS Grid**         | Native CSS                            | Responsive layout with fixed sidebars and dynamic map |
+| **Portals**          | React Portals                         | For modals, sheets, floating menus                    |
+| **Drag & Drop**      | `react-dnd`                           | Token movement, item transfer                         |
+| **Resizable Panels** | `react-resizable`, `react-split-pane` | Optional resizable layout                             |
+
+5. 🧰 Module Creator GUI (Early Phase)
+5.1 Platform Options
+
+Web App (React-based) – Easy to integrate with UVTT
+
+Electron Desktop App – Full access to local file system
+
+5.2 Key Features
+| Feature                 | Description                            |
+| ----------------------- | -------------------------------------- |
+| Module scaffolding      | Create new module folders and files    |
+| Sheet builder (WYSIWYG) | Build character sheets visually        |
+| Rule editor             | JS-based hooks for rolls, conditions   |
+| Asset bundler           | Upload/manage icons, maps, audio, etc. |
+| Live preview            | See how sheet looks/behaves in UVTT UI |
+
+6. 🔐 Security Model
+6.1 Python Core as Source of Truth
+
+All roll logic, movement, and events go through Python for validation
+
+JS modules can't modify state directly
+
+6.2 Module Sandbox
+
+Only expose whitelisted APIs to modules
+
+Potential integration with WebAssembly for secure game logic
+
+7. 💾 Data & Persistence
+7.1 Data Formats
+
+JSON for characters, modules, and maps
+
+Optionally SQLite or a file-based NoSQL store for persistence
+
+7.2 Cloud Save (Later Phase)
+
+Sync to cloud or Git-based backup for modules/games
+
+8. 🧪 Tech Stack Summary
+| Area           | Stack/Library                        |
+| -------------- | ------------------------------------ |
+| Backend        | Python, FastAPI, WebSockets          |
+| Frontend UI    | React, CSS Grid, Tailwind (optional) |
+| Drag & Drop    | `react-dnd`                          |
+| Portals        | `ReactDOM.createPortal`              |
+| Module Loading | `React.lazy` + dynamic imports       |
+| GUI Tooling    | React + Electron (or pure Web)       |
+| Multiplayer    | WebSocket (broadcast + RPC)          |
+
+
+9. 📦 Project Roadmap (Updated)
+
+| Phase | Focus                                       | Est. Time |
+| ----- | ------------------------------------------- | --------- |
+| 1     | **Core Engine (Python)** + WebSocket        | 1 week    |
+| 2     | **React UI with CSS Grid + Drag/Drop**      | 1 week    |
+| 3     | **Multiplayer Sync (early priority)**       | 1 week    |
+| 4     | **Module Runtime Loader + Sample DnD5e**    | 1 week    |
+| 5     | **GUI Module Creator (MVP)**                | 1 week    |
+| 6     | Portals, Modals, Popouts                    | 1 week    |
+| 7     | Advanced modules & battle system            | 2 weeks   |
+| 8     | Community testing, polish, doc, marketplace | 2 weeks   |
+
+
+
+
+
