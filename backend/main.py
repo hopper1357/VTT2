@@ -5,10 +5,24 @@ import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, List
 from backend.module_loader import discover_modules
 
 app = FastAPI()
+
+# CORS Middleware
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Discover and load modules on startup
 available_modules = discover_modules()
