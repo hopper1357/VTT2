@@ -27,13 +27,14 @@ const AppContent = () => {
     // Connect to the server
     websocketService.connect();
 
-    // In a real app, you'd implement a cleanup function to remove listeners
-    // when the component unmounts, but for this singleton service, we'll omit it.
-    // return () => {
-    //   websocketService.off('connection_ready', onConnectionReady);
-    //   websocketService.off('player_join', onPlayerJoin);
-    //   websocketService.off('player_leave', onPlayerLeave);
-    // };
+    // Cleanup on component unmount
+    return () => {
+      console.log("Cleaning up WebSocket connection and listeners.");
+      websocketService.off('connection_ready', onConnectionReady);
+      websocketService.off('player_join', onPlayerJoin);
+      websocketService.off('player_leave', onPlayerLeave);
+      websocketService.disconnect();
+    };
   }, [handleServerEvent]);
 
   return (

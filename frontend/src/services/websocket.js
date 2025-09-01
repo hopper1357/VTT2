@@ -16,6 +16,16 @@ class EventEmitter {
             listeners.forEach(listener => listener.apply(this, args));
         }
     }
+
+    off(event, listener) {
+        const listeners = this.events[event];
+        if (typeof listeners === 'object') {
+            const idx = listeners.indexOf(listener);
+            if (idx > -1) {
+                listeners.splice(idx, 1);
+            }
+        }
+    }
 }
 
 class WebSocketService {
@@ -25,8 +35,8 @@ class WebSocketService {
     }
 
     connect(url = "ws://localhost:8000/ws") {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            console.log("WebSocket is already connected.");
+        if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
+            console.log("WebSocket is already connected or connecting.");
             return;
         }
 
@@ -52,12 +62,19 @@ class WebSocketService {
         this.socket.onclose = () => {
             console.log("WebSocket disconnected");
             this.emitter.emit('close');
+            this.socket = null; // Ensure we can reconnect
         };
 
         this.socket.onerror = (error) => {
             console.error("WebSocket error:", error);
             this.emitter.emit('error', error);
         };
+    }
+
+    disconnect() {
+        if (this.socket) {
+            this.socket.close();
+        }
     }
 
     send(type, payload) {
@@ -74,13 +91,7 @@ class WebSocketService {
     }
 
     off(event, listener) {
-        // Basic implementation to remove a listener
-        if(this.events[event]){
-            const idx = this.events[event].indexOf(listener);
-            if (idx > -1) {
-                this.events[event].splice(idx, 1);
-            }
-        }
+        this.emitter.off(event, listener);
     }
 }
 
