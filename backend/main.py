@@ -1,11 +1,41 @@
 import random
 import uuid
 import json
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from typing import Dict
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from typing import Dict, List
+from backend.module_loader import discover_modules
 
 app = FastAPI()
+
+# CORS Middleware
+origins = [
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Discover and load modules on startup
+available_modules = discover_modules()
+
+# Mount static directories for each module
+for module in available_modules:
+    module_id = module.get("id")
+    if module_id:
+        module_path = os.path.join("modules", module_id)
+        if os.path.isdir(module_path):
+            app.mount(f"/modules/{module_id}", StaticFiles(directory=module_path), name=module_id)
+            print(f"Mounted module '{module_id}' at /modules/{module_id}")
+
 
 html = """
 <!DOCTYPE html>
@@ -86,6 +116,12 @@ game_state = GameState()
 @app.get("/")
 async def get():
     return HTMLResponse(html)
+
+
+@app.get("/api/modules", response_model=List[Dict])
+async def get_modules():
+    """Returns a list of available modules."""
+    return available_modules
 
 
 @app.get("/roll/{dice_string}")

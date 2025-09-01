@@ -1,0 +1,9 @@
+{
+  "name": "Dungeons & Dragons 5E",
+  "id": "dnd5e",
+  "version": "1.0.0",
+  "entry_point": "main.js",
+  "character_sheet": "CharacterSheet.jsx",
+  "rules": "rules.js",
+  "assets": ["spells.json", "icons/"]
+}

@@ -8,11 +8,30 @@ import BottomBar from './components/BottomBar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { GameStateProvider, GameStateContext } from './context/GameStateContext';
+import { ModuleProvider, ModuleContext } from './context/ModuleContext';
 import websocketService from './services/websocket';
 
 const AppContent = () => {
   const { handleServerEvent } = useContext(GameStateContext);
+  const { fetchModules, registerComponents } = useContext(ModuleContext);
 
+  // Effect to handle module component registration
+  useEffect(() => {
+    const handleModuleLoaded = (event) => {
+      const { moduleId } = event.detail;
+      const components = window[`${moduleId}_components`];
+      if (components) {
+        registerComponents(moduleId, components);
+      }
+    };
+
+    window.addEventListener('module-loaded', handleModuleLoaded);
+    return () => {
+      window.removeEventListener('module-loaded', handleModuleLoaded);
+    };
+  }, [registerComponents]);
+
+  // Effect for WebSocket connection
   useEffect(() => {
     // Define event handlers
     const onConnectionReady = (payload) => handleServerEvent('connection_ready', payload);
@@ -37,6 +56,11 @@ const AppContent = () => {
     };
   }, [handleServerEvent]);
 
+  // Effect for fetching modules
+  useEffect(() => {
+    fetchModules();
+  }, [fetchModules]);
+
   return (
     <div className="vtt-container">
       <TopBar />
@@ -50,11 +74,13 @@ const AppContent = () => {
 
 function App() {
   return (
-    <GameStateProvider>
-      <DndProvider backend={HTML5Backend}>
-        <AppContent />
-      </DndProvider>
-    </GameStateProvider>
+    <ModuleProvider>
+      <GameStateProvider>
+        <DndProvider backend={HTML5Backend}>
+          <AppContent />
+        </DndProvider>
+      </GameStateProvider>
+    </ModuleProvider>
   );
 }
 
