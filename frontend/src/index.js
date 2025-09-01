@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-// Expose React to the window object so that dynamically loaded module scripts can use it.
-window.React = React;
-
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+
+// Expose React to the window object so that dynamically loaded module scripts can use it.
+window.React = React;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
