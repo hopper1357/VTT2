@@ -1,7 +1,9 @@
 import random
+import uuid
+import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from typing import List
+from typing import Dict
 
 app = FastAPI()
 
@@ -39,22 +41,47 @@ html = """
 </html>
 """
 
-class ConnectionManager:
+class GameState:
+    """Manages the overall state of the game session."""
     def __init__(self):
-        self.active_connections: List[WebSocket] = []
+        self.players: Dict[str, Dict] = {}
 
-    async def connect(self, websocket: WebSocket):
+    def add_player(self, client_id: str):
+        if client_id not in self.players:
+            self.players[client_id] = {"id": client_id}
+            print(f"Player {client_id} added to game state.")
+
+    def remove_player(self, client_id: str):
+        if client_id in self.players:
+            del self.players[client_id]
+            print(f"Player {client_id} removed from game state.")
+
+class ConnectionManager:
+    """Manages active WebSocket connections."""
+    def __init__(self):
+        self.active_connections: Dict[str, WebSocket] = {}
+
+    async def connect(self, websocket: WebSocket, client_id: str):
         await websocket.accept()
-        self.active_connections.append(websocket)
+        self.active_connections[client_id] = websocket
 
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+    def disconnect(self, client_id: str):
+        if client_id in self.active_connections:
+            del self.active_connections[client_id]
 
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
+    async def send_personal_message(self, payload: Dict, client_id: str):
+        message = json.dumps(payload)
+        if client_id in self.active_connections:
+            await self.active_connections[client_id].send_text(message)
+
+    async def broadcast(self, payload: Dict):
+        message = json.dumps(payload)
+        for connection in self.active_connections.values():
             await connection.send_text(message)
 
+# Create single instances of the managers
 manager = ConnectionManager()
+game_state = GameState()
 
 @app.get("/")
 async def get():
@@ -73,11 +100,35 @@ async def roll_dice(dice_string: str):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
+    client_id = str(uuid.uuid4())
+    await manager.connect(websocket, client_id)
+    game_state.add_player(client_id)
+
+    # Send the new client their ID and the current game state
+    await manager.send_personal_message(
+        {"type": "connection_ready", "payload": {"client_id": client_id, "game_state": game_state.players}},
+        client_id
+    )
+
+    # Broadcast the new player's arrival to everyone else
+    await manager.broadcast(
+        {"type": "player_join", "payload": game_state.players[client_id]}
+    )
+
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(f"Client says: {data}")
+            message = json.loads(data)
+            # For now, we only handle chat messages
+            if message.get("type") == "chat_message":
+                await manager.broadcast({
+                    "type": "chat_message",
+                    "payload": {"from": client_id, "text": message["payload"]["text"]}
+                })
+
     except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.broadcast("A client has left the chat")
+        manager.disconnect(client_id)
+        game_state.remove_player(client_id)
+        await manager.broadcast(
+            {"type": "player_leave", "payload": {"client_id": client_id}}
+        )
